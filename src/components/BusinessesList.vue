@@ -180,7 +180,7 @@
               </td>
               <td>
                 <div class="table-actions">
-                  <button class="action-btn view-btn">View</button>
+                  <button @click="previewBusiness(business)" class="action-btn view-btn">View</button>
                   <button class="action-btn edit-btn" @click="editBusiness(business)">Edit</button>
                 </div>
               </td>
@@ -289,23 +289,35 @@
     <AddBusiness 
       v-if="showAddBusiness" 
       :business="selectedBusiness"
-      @closeAddBusinessModal="addBusiness" />
+      @closeAddBusinessModal="addBusiness" 
+    />
+
+    <BstPreview
+      :business="selectedBusiness"
+      v-if="showPreview"
+      @closeBusinessPreview="previewBusiness" 
+    /> 
+
+    
   </div>
 </template>
 
 <script>
 import { useRouter } from 'vue-router'
 import AddBusiness from './AddBusiness.vue'
+import BstPreview from './BstPreview.vue'
 
 export default {
   name: 'BusinessList',
   components: {
-    AddBusiness
+    AddBusiness,
+    BstPreview
   },
   data() {
     return {
       selectedBusiness: [],
       showAddBusiness: false,
+      showPreview: false,
       router: useRouter(),
       viewMode: 'table', // 'table' or 'cards'
       businesses: [
@@ -473,6 +485,14 @@ export default {
   },
 
   methods: {
+    previewBusiness(business) {
+      this.showPreview = !this.showPreview;
+      
+      this.selectedBusiness = business;
+      if(!this.showPreview) {
+        this.selectedBusiness = [];
+      }
+    },
     editBusiness(business) {
       this.showAddBusiness = !this.showAddBusiness;
       
