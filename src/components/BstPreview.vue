@@ -1,5 +1,5 @@
 <template>
-  <div class="modal-overlay" @click.self="handleCancel" role="dialog" aria-labelledby="modal-title" aria-modal="true">
+  <div class="modal-overlay" :class="{ 'dark-mode': isDarkMode }" @click.self="handleCancel" role="dialog" aria-labelledby="modal-title" aria-modal="true">
     <div class="modal-container">
       <button 
         class="close-btn" 
@@ -390,6 +390,10 @@ export default {
     business: {
       type: Object,
       default: null
+    },
+    isDarkMode: {
+      type: Boolean,
+      default: false
     }
   },
 
@@ -715,6 +719,10 @@ export default {
   animation: fadeIn 0.3s ease-in-out;
 }
 
+.dark-mode.modal-overlay {
+  background: rgba(0, 0, 0, 0.7);
+}
+
 @keyframes fadeIn {
   from { opacity: 0; }
   to { opacity: 1; }
@@ -732,11 +740,11 @@ export default {
   box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
   animation: slideUp 0.3s ease-out;
+  transition: background-color 0.3s ease;
 }
 
-@keyframes slideUp {
-  from { transform: translateY(20px); opacity: 0; }
-  to { transform: translateY(0); opacity: 1; }
+.dark-mode .modal-container {
+  background: #1a202c;
 }
 
 /* Close Button */
@@ -748,12 +756,16 @@ export default {
   border: none;
   cursor: pointer;
   padding: 0.5rem;
-  color: #4a5568;
+  color: white;
   transition: color 0.2s ease, transform 0.2s ease;
 }
 
+.dark-mode .close-btn {
+  color: #e2e8f0;
+}
+
 .close-btn:hover {
-  color: #1a202c;
+  color: #667eea;
   transform: scale(1.1);
 }
 
@@ -803,6 +815,11 @@ export default {
   animation: spin 1s linear infinite;
 }
 
+.dark-mode .loading-spinner {
+  border-color: #4a5568;
+  border-top-color: #667eea;
+}
+
 .loading-spinner-small {
   width: 1rem;
   height: 1rem;
@@ -824,6 +841,10 @@ export default {
   font-size: 1rem;
 }
 
+.dark-mode .loading-text {
+  color: #a0aec0;
+}
+
 /* Form Section */
 .form-section {
   max-width: 900px;
@@ -839,6 +860,11 @@ export default {
   border: 1px solid #e2e8f0;
 }
 
+.dark-mode .business-form {
+  background: #2d3748;
+  border-color: #4a5568;
+}
+
 /* Business ID Display */
 .business-id-display {
   margin-bottom: 2rem;
@@ -846,6 +872,11 @@ export default {
   background: #f8fafc;
   border-radius: 0.5rem;
   border: 1px solid #e2e8f0;
+}
+
+.dark-mode .business-id-display {
+  background: #4a5568;
+  border-color: #718096;
 }
 
 .business-id-value {
@@ -861,6 +892,10 @@ export default {
   margin: 0;
 }
 
+.dark-mode .help-text {
+  color: #a0aec0;
+}
+
 /* Form Section Groups */
 .form-section-group {
   margin-bottom: 2.5rem;
@@ -873,6 +908,11 @@ export default {
   margin: 0 0 1.5rem 0;
   padding-bottom: 0.75rem;
   border-bottom: 2px solid #e2e8f0;
+}
+
+.dark-mode .section-title {
+  color: #f7fafc;
+  border-bottom-color: #4a5568;
 }
 
 /* Form Layout */
@@ -902,6 +942,10 @@ export default {
   gap: 0.25rem;
 }
 
+.dark-mode .form-label {
+  color: #e2e8f0;
+}
+
 .required {
   color: #e53e3e;
 }
@@ -920,8 +964,17 @@ export default {
   transition: background 0.2s ease;
 }
 
+.dark-mode .tooltip {
+  background: #718096;
+  color: #f7fafc;
+}
+
 .tooltip:hover {
   background: #cbd5e0;
+}
+
+.dark-mode .tooltip:hover {
+  background: #a0aec0;
 }
 
 /* Form Inputs */
@@ -937,6 +990,15 @@ export default {
   background: white;
   width: 100%;
   box-sizing: border-box;
+  color: #1a202c;
+}
+
+.dark-mode .form-input,
+.dark-mode .form-select,
+.dark-mode .form-textarea {
+  background: #4a5568;
+  border-color: #718096;
+  color: #f7fafc;
 }
 
 .form-input:focus,
@@ -979,6 +1041,10 @@ export default {
   padding-top: 2rem;
   border-top: 1px solid #e2e8f0;
   margin-top: 2rem;
+}
+
+.dark-mode .form-actions {
+  border-top-color: #4a5568;
 }
 
 .btn {
@@ -1024,9 +1090,19 @@ export default {
   border: 2px solid #e2e8f0;
 }
 
+.dark-mode .btn-outline {
+  color: #f7fafc;
+  border-color: #718096;
+}
+
 .btn-outline:hover:not(:disabled) {
   background: #f7fafc;
   border-color: #cbd5e0;
+}
+
+.dark-mode .btn-outline:hover:not(:disabled) {
+  background: #4a5568;
+  border-color: #a0aec0;
 }
 
 /* Screen Reader Only */

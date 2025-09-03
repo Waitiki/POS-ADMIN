@@ -1,5 +1,5 @@
- <template>
-  <div class="businesses-container">
+<template>
+  <div class="businesses-container" :class="{ 'dark-mode': isDarkMode }">
     <!-- Header Section -->
     <div class="header-section">
       <div class="header-content">
@@ -8,6 +8,15 @@
           <p class="page-subtitle">Manage and monitor your business portfolio</p>
         </div>
         <div class="header-actions">
+          <button @click="toggleTheme" class="theme-toggle-btn">
+            <svg v-if="isDarkMode" width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M12 3V5M12 19V21M5 12H3M21 12H19M17.657 17.657L16.243 16.243M17.657 6.343L16.243 7.757M6.343 17.657L7.757 16.243M6.343 6.343L7.757 7.757" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+            <svg v-else width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            {{ isDarkMode ? 'Light Mode' : 'Dark Mode' }}
+          </button>
           <button class="logout-btn" @click="router.push('/')">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path d="M9 21H5C4.46957 21 3.96086 20.7893 3.58579 20.4142C3.21071 20.0391 3 19.5304 3 19V5C3 4.46957 3.21071 3.96086 3.58579 3.58579C3.96086 3.21071 4.46957 3 5 3H9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
@@ -144,13 +153,11 @@
         <table class="businesses-table">
           <thead>
             <tr>
-              <!-- <th>Business ID</th> -->
               <th>Business Name</th>
               <th>Owner</th>
               <th>Email</th>
               <th>Phone</th>
               <th>Location</th>
-               
               <th>Monthly Charge</th>
               <th>Due Date</th>
               <th>Status</th>
@@ -159,7 +166,6 @@
           </thead>
           <tbody>
             <tr v-for="business in filteredBusinesses" :key="business.businessID">
-              <!-- <td>{{ business.businessID }}</td> -->
               <td>
                 <div class="business-name-cell">
                   <strong>{{ business.businessName }}</strong>
@@ -170,7 +176,6 @@
               <td>{{ business.email }}</td>
               <td>{{ business.phoneNo }}</td>
               <td>{{ business.location }}</td>
-               
               <td>{{ formatCurrency(business.monthlyCharge) }}</td>
               <td>{{ formatDate(business.dueDate) }}</td>
               <td>
@@ -260,8 +265,8 @@
 
           <div class="business-footer">
             <div class="business-actions">
-              <button class="action-btn view-btn">View</button>
-              <button class="action-btn edit-btn">Edit</button>
+              <button @click="previewBusiness(business)" class="action-btn view-btn">View</button>
+              <button @click="editBusiness(business)" class="action-btn edit-btn">Edit</button>
             </div>
           </div>
         </div>
@@ -289,16 +294,16 @@
     <AddBusiness 
       v-if="showAddBusiness" 
       :business="selectedBusiness"
+      :isDarkMode="isDarkMode"
       @closeAddBusinessModal="addBusiness" 
     />
 
     <BstPreview
       :business="selectedBusiness"
+      :isDarkMode="isDarkMode"
       v-if="showPreview"
       @closeBusinessPreview="previewBusiness" 
     /> 
-
-    
   </div>
 </template>
 
@@ -320,6 +325,7 @@ export default {
       showPreview: false,
       router: useRouter(),
       viewMode: 'table', // 'table' or 'cards'
+      isDarkMode: false, // Default to light mode
       businesses: [
         {
           businessID: 'BUS001',
@@ -441,7 +447,6 @@ export default {
     filteredBusinesses() {
       let filtered = this.businesses
 
-      // Search filter
       if (this.filters.search) {
         const searchLower = this.filters.search.toLowerCase()
         filtered = filtered.filter(business => 
@@ -452,17 +457,14 @@ export default {
         )
       }
 
-      // Status filter
       if (this.filters.status) {
         filtered = filtered.filter(business => business.status === this.filters.status)
       }
 
-      // Location filter
       if (this.filters.location) {
         filtered = filtered.filter(business => business.location === this.filters.location)
       }
 
-      // Sort
       filtered.sort((a, b) => {
         switch (this.filters.sortBy) {
           case 'businessName':
@@ -487,45 +489,39 @@ export default {
   methods: {
     previewBusiness(business) {
       this.showPreview = !this.showPreview;
-      
       this.selectedBusiness = business;
-      if(!this.showPreview) {
+      if (!this.showPreview) {
         this.selectedBusiness = [];
       }
     },
     editBusiness(business) {
       this.showAddBusiness = !this.showAddBusiness;
-      
       this.selectedBusiness = business;
     },
     addBusiness() {
       this.showAddBusiness = !this.showAddBusiness;
-
-      if(!this.showAddBusiness) {
+      if (!this.showAddBusiness) {
         this.selectedBusiness = [];
       }
     },
-
     clearFilters() {
       this.filters.search = ''
       this.filters.status = ''
       this.filters.location = ''
       this.filters.sortBy = 'businessName'
     },
-
     getStatusColor(status) {
       switch (status) {
         case 'Active':
-          return 'bg-green-100 text-green-800'
+          return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
         case 'Inactive':
-          return 'bg-red-100 text-red-800'
+          return 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
         case 'Pending':
-          return 'bg-yellow-100 text-yellow-800'
+          return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200'
         default:
-          return 'bg-gray-100 text-gray-800'
+          return 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200'
       }
     },
-
     formatDate(dateString) {
       return new Date(dateString).toLocaleDateString('en-US', {
         year: 'numeric',
@@ -533,7 +529,6 @@ export default {
         day: 'numeric'
       })
     },
-
     formatCurrency(amount) {
       return new Intl.NumberFormat('en-US', {
         style: 'currency',
@@ -541,13 +536,20 @@ export default {
         minimumFractionDigits: 0
       }).format(amount)
     },
-
     toggleViewMode() {
       this.viewMode = this.viewMode === 'table' ? 'cards' : 'table'
+    },
+    toggleTheme() {
+      this.isDarkMode = !this.isDarkMode
+      localStorage.setItem('theme', this.isDarkMode ? 'dark' : 'light')
     }
   },
 
   mounted() {
+    // Load theme from localStorage
+    const savedTheme = localStorage.getItem('theme')
+    this.isDarkMode = savedTheme === 'dark'
+    
     // Simulate loading
     this.isLoading = true
     setTimeout(() => {
@@ -562,6 +564,11 @@ export default {
   min-height: 100vh;
   background: #f8fafc;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  transition: background-color 0.3s ease;
+}
+
+.businesses-container.dark-mode {
+  background: #1a202c;
 }
 
 /* Header Section */
@@ -598,6 +605,26 @@ export default {
   display: flex;
   gap: 12px;
   align-items: center;
+}
+
+.theme-toggle-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: white;
+  padding: 10px 16px;
+  border-radius: 10px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  backdrop-filter: blur(10px);
+}
+
+.theme-toggle-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: translateY(-1px);
 }
 
 .logout-btn {
@@ -647,6 +674,11 @@ export default {
   padding: 24px;
 }
 
+.dark-mode .filters-section {
+  background: #2d3748;
+  border-bottom-color: #4a5568;
+}
+
 .search-bar {
   max-width: 1200px;
   margin: 0 auto;
@@ -669,6 +701,10 @@ export default {
   color: #a0aec0;
 }
 
+.dark-mode .search-icon {
+  color: #a0aec0;
+}
+
 .search-input {
   width: 100%;
   padding: 12px 16px 12px 48px;
@@ -677,6 +713,14 @@ export default {
   font-size: 16px;
   transition: all 0.2s ease;
   outline: none;
+  background: white;
+  color: #1a202c;
+}
+
+.dark-mode .search-input {
+  background: #4a5568;
+  border-color: #718096;
+  color: #f7fafc;
 }
 
 .search-input:focus {
@@ -698,6 +742,12 @@ export default {
   transition: all 0.2s ease;
 }
 
+.dark-mode .filter-toggle-btn {
+  background: #4a5568;
+  border-color: #718096;
+  color: #f7fafc;
+}
+
 .filter-toggle-btn:hover,
 .filter-toggle-btn.active {
   border-color: #667eea;
@@ -709,6 +759,10 @@ export default {
   margin: 20px auto 0;
   padding-top: 20px;
   border-top: 1px solid #e2e8f0;
+}
+
+.dark-mode .advanced-filters {
+  border-top-color: #4a5568;
 }
 
 .filter-row {
@@ -731,6 +785,10 @@ export default {
   color: #4a5568;
 }
 
+.dark-mode .filter-label {
+  color: #e2e8f0;
+}
+
 .filter-select {
   padding: 10px 12px;
   border: 2px solid #e2e8f0;
@@ -739,6 +797,13 @@ export default {
   background: white;
   transition: all 0.2s ease;
   outline: none;
+  color: #1a202c;
+}
+
+.dark-mode .filter-select {
+  background: #4a5568;
+  border-color: #718096;
+  color: #f7fafc;
 }
 
 .filter-select:focus {
@@ -756,9 +821,20 @@ export default {
   transition: all 0.2s ease;
 }
 
+.dark-mode .clear-filters-btn {
+  background: #4a5568;
+  border-color: #718096;
+  color: #f7fafc;
+}
+
 .clear-filters-btn:hover {
   background: #edf2f7;
   border-color: #cbd5e0;
+}
+
+.dark-mode .clear-filters-btn:hover {
+  background: #718096;
+  border-color: #a0aec0;
 }
 
 /* Results Summary */
@@ -782,6 +858,10 @@ export default {
   margin: 0;
 }
 
+.dark-mode .results-text {
+  color: #a0aec0;
+}
+
 .view-toggle {
   display: flex;
   gap: 8px;
@@ -789,6 +869,11 @@ export default {
   border: 1px solid #e2e8f0;
   border-radius: 12px;
   padding: 4px;
+}
+
+.dark-mode .view-toggle {
+  background: #4a5568;
+  border-color: #718096;
 }
 
 .view-toggle-btn {
@@ -805,14 +890,26 @@ export default {
   transition: all 0.2s ease;
 }
 
+.dark-mode .view-toggle-btn {
+  color: #a0aec0;
+}
+
 .view-toggle-btn.active {
   background: white;
   color: #667eea;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
+.dark-mode .view-toggle-btn.active {
+  background: #2d3748;
+}
+
 .view-toggle-btn:hover:not(.active) {
   color: #4a5568;
+}
+
+.dark-mode .view-toggle-btn:hover:not(.active) {
+  color: #e2e8f0;
 }
 
 /* Loading State */
@@ -833,6 +930,11 @@ export default {
   animation: spin 1s linear infinite;
 }
 
+.dark-mode .loading-spinner {
+  border-color: #4a5568;
+  border-top-color: #667eea;
+}
+
 @keyframes spin {
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
@@ -842,6 +944,10 @@ export default {
   margin-top: 16px;
   color: #718096;
   font-size: 16px;
+}
+
+.dark-mode .loading-text {
+  color: #a0aec0;
 }
 
 /* Businesses Content */
@@ -860,6 +966,11 @@ export default {
   overflow: hidden;
 }
 
+.dark-mode .businesses-table-container {
+  background: #2d3748;
+  border-color: #4a5568;
+}
+
 .businesses-table {
   width: 100%;
   border-collapse: collapse;
@@ -876,14 +987,28 @@ export default {
   white-space: nowrap;
 }
 
+.dark-mode .businesses-table th {
+  background: #4a5568;
+  color: #f7fafc;
+  border-bottom-color: #718096;
+}
+
 .businesses-table td {
   padding: 16px 12px;
   border-bottom: 1px solid #f1f5f9;
   vertical-align: middle;
 }
 
+.dark-mode .businesses-table td {
+  border-bottom-color: #4a5568;
+}
+
 .businesses-table tbody tr:hover {
   background: #f8fafc;
+}
+
+.dark-mode .businesses-table tbody tr:hover {
+  background: #4a5568;
 }
 
 .business-name-cell {
@@ -897,9 +1022,17 @@ export default {
   font-weight: 600;
 }
 
+.dark-mode .business-name-cell strong {
+  color: #f7fafc;
+}
+
 .business-name-cell small {
   color: #718096;
   font-size: 12px;
+}
+
+.dark-mode .business-name-cell small {
+  color: #a0aec0;
 }
 
 .table-actions {
@@ -921,6 +1054,11 @@ export default {
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
   border: 1px solid #e2e8f0;
   transition: all 0.2s ease;
+}
+
+.dark-mode .business-card {
+  background: #2d3748;
+  border-color: #4a5568;
 }
 
 .business-card:hover {
@@ -959,6 +1097,10 @@ export default {
   line-height: 1.3;
 }
 
+.dark-mode .business-name {
+  color: #f7fafc;
+}
+
 .business-owner {
   font-size: 14px;
   color: #667eea;
@@ -970,6 +1112,10 @@ export default {
   font-size: 14px;
   color: #718096;
   margin: 0;
+}
+
+.dark-mode .business-location {
+  color: #a0aec0;
 }
 
 .business-status {
@@ -993,6 +1139,10 @@ export default {
   border-bottom: 1px solid #f1f5f9;
 }
 
+.dark-mode .business-details {
+  border-color: #4a5568;
+}
+
 .detail-row {
   display: flex;
   justify-content: space-between;
@@ -1005,16 +1155,28 @@ export default {
   border-bottom: 1px solid #f8fafc;
 }
 
+.dark-mode .detail-row:not(:last-child) {
+  border-bottom-color: #4a5568;
+}
+
 .detail-label {
   font-weight: 600;
   color: #4a5568;
   min-width: 120px;
 }
 
+.dark-mode .detail-label {
+  color: #e2e8f0;
+}
+
 .detail-value {
   color: #1a202c;
   text-align: right;
   word-break: break-word;
+}
+
+.dark-mode .detail-value {
+  color: #f7fafc;
 }
 
 .business-description {
@@ -1024,11 +1186,19 @@ export default {
   border-radius: 8px;
 }
 
+.dark-mode .business-description {
+  background: #4a5568;
+}
+
 .description-text {
   font-size: 14px;
   color: #4a5568;
   line-height: 1.5;
   margin: 0;
+}
+
+.dark-mode .description-text {
+  color: #e2e8f0;
 }
 
 .business-stats {
@@ -1038,6 +1208,10 @@ export default {
   margin-bottom: 20px;
   padding: 16px 0;
   border-top: 1px solid #f1f5f9;
+}
+
+.dark-mode .business-stats {
+  border-top-color: #4a5568;
 }
 
 .stat-item {
@@ -1056,36 +1230,24 @@ export default {
   letter-spacing: 0.025em;
 }
 
+.dark-mode .stat-label {
+  color: #a0aec0;
+}
+
 .stat-value {
   font-size: 16px;
   font-weight: 700;
   color: #1a202c;
 }
 
-.rating-stars {
-  display: inline-flex;
-  gap: 2px;
-  margin-right: 4px;
-}
-
-.star {
-  color: #e2e8f0;
-  font-size: 14px;
-}
-
-.star.filled {
-  color: #fbbf24;
+.dark-mode .stat-value {
+  color: #f7fafc;
 }
 
 .business-footer {
   display: flex;
   justify-content: space-between;
   align-items: center;
-}
-
-.last-updated {
-  font-size: 12px;
-  color: #a0aec0;
 }
 
 .business-actions {
@@ -1109,8 +1271,18 @@ export default {
   border: 1px solid #e2e8f0;
 }
 
+.dark-mode .view-btn {
+  background: #4a5568;
+  color: #f7fafc;
+  border-color: #718096;
+}
+
 .view-btn:hover {
   background: #edf2f7;
+}
+
+.dark-mode .view-btn:hover {
+  background: #718096;
 }
 
 .edit-btn {
@@ -1135,6 +1307,10 @@ export default {
   margin-bottom: 24px;
 }
 
+.dark-mode .empty-icon {
+  color: #718096;
+}
+
 .empty-title {
   font-size: 24px;
   font-weight: 700;
@@ -1142,11 +1318,19 @@ export default {
   margin: 0 0 12px 0;
 }
 
+.dark-mode .empty-title {
+  color: #f7fafc;
+}
+
 .empty-description {
   font-size: 16px;
   color: #718096;
   margin: 0 0 24px 0;
   line-height: 1.5;
+}
+
+.dark-mode .empty-description {
+  color: #a0aec0;
 }
 
 .empty-action-btn {
@@ -1267,112 +1451,4 @@ export default {
     text-align: center;
   }
 }
-
-/* Dark mode support */
-/* @media (prefers-color-scheme: dark) {
-  .businesses-container {
-    background: #1a202c;
-  }
-
-  .filters-section {
-    background: #2d3748;
-    border-bottom-color: #4a5568;
-  }
-
-  .search-input,
-  .filter-select {
-    background: #4a5568;
-    border-color: #718096;
-    color: #f7fafc;
-  }
-
-  .search-input:focus,
-  .filter-select:focus {
-    border-color: #667eea;
-  }
-
-  .view-toggle {
-    background: #4a5568;
-    border-color: #718096;
-  }
-
-  .view-toggle-btn.active {
-    background: #2d3748;
-    color: #667eea;
-  }
-
-  .businesses-table-container {
-    background: #2d3748;
-    border-color: #4a5568;
-  }
-
-  .businesses-table th {
-    background: #4a5568;
-    color: #f7fafc;
-    border-bottom-color: #718096;
-  }
-
-  .businesses-table td {
-    border-bottom-color: #4a5568;
-  }
-
-  .businesses-table tbody tr:hover {
-    background: #4a5568;
-  }
-
-  .business-name-cell strong {
-    color: #f7fafc;
-  }
-
-  .business-card {
-    background: #2d3748;
-    border-color: #4a5568;
-  }
-
-  .business-name {
-    color: #f7fafc;
-  }
-
-  .stat-value {
-    color: #f7fafc;
-  }
-
-  .business-stats {
-    border-color: #4a5568;
-  }
-
-  .business-details {
-    border-color: #4a5568;
-  }
-
-  .detail-row {
-    border-bottom-color: #4a5568;
-  }
-
-  .detail-label {
-    color: #e2e8f0;
-  }
-
-  .detail-value {
-    color: #f7fafc;
-  }
-
-  .business-description {
-    background: #4a5568;
-  }
-
-  .description-text {
-    color: #e2e8f0;
-  }
-
-  .view-btn {
-    background: #4a5568;
-    color: #f7fafc;
-    border-color: #718096;
-  }
-
-  .view-btn:hover {
-    background: #718096;
-  }
-} */
 </style>
